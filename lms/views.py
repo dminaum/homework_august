@@ -4,7 +4,7 @@ from .serializers import CourseSerializer, LessonSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
+    queryset = Course.objects.all().prefetch_related('lessons')
     serializer_class = CourseSerializer
 
 
