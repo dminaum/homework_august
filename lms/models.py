@@ -1,10 +1,14 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class Course(models.Model):
     name = models.CharField(max_length=150, verbose_name='Название курса')
     image = models.ImageField(upload_to='lms/', verbose_name='Превью (картинка)', blank=True, null=True)
     description = models.TextField(verbose_name='Описание')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses', verbose_name='Владелец')
 
     def __str__(self):
         return self.name
@@ -20,8 +24,8 @@ class Lesson(models.Model):
     image = models.ImageField(upload_to='lms/', verbose_name='Превью (картинка)', blank=True, null=True)
     description = models.TextField(verbose_name='Описание')
     video_url = models.URLField(verbose_name='Ссылка на видео')
-    course = models.ForeignKey('Course', on_delete=models.CASCADE, verbose_name='Курс',
-                               related_name='lessons')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, verbose_name='Курс', related_name='lessons')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lessons', verbose_name='Владелец')
 
     def __str__(self):
         return self.name
