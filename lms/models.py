@@ -34,3 +34,29 @@ class Lesson(models.Model):
         verbose_name = 'урок'
         verbose_name_plural = 'уроки'
         ordering = ['id']
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        'users.CustomUser',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='subscriptions'
+    )
+
+    course = models.ForeignKey(
+        'Course',
+        on_delete=models.PROTECT,
+        verbose_name='Оплаченный курс',
+        null=True, blank=True,
+        related_name='subscriptions',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'подписка'
+        verbose_name_plural = 'подписки'
+
+    def __str__(self):
+        return f"{self.user} → {self.course}"
