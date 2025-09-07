@@ -10,7 +10,29 @@ User = get_user_model()
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['id', 'user', 'paid_at', 'course', 'lesson', 'amount', 'method']
+        fields = [
+            'id', 'user', 'paid_at',
+            'course',
+            'amount', 'method',
+            'status', 'stripe_session_id', 'checkout_url'
+        ]
+        read_only_fields = ['id', 'user', 'paid_at', 'status', 'stripe_session_id', 'checkout_url']
+
+
+class PaymentCheckoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+
+        fields = ['course', 'amount']
+
+    def validate(self, attrs):
+        course = attrs.get('course')
+        if not course:
+            raise serializers.ValidationError('Нужно указать курс для оплаты.')
+        amount = attrs.get('amount')
+        if amount is None or amount <= 0:
+            raise serializers.ValidationError('Сумма должна быть больше нуля.')
+        return attrs
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
