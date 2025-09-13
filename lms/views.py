@@ -8,7 +8,7 @@ from .models import Course, Lesson, Subscription
 from .pagination import MyPagination
 from .serializers import CourseSerializer, LessonSerializer
 from .permissions import IsOwner, ModerOrOwner, NotModer
-
+from .tasks import email_course_updated
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all().prefetch_related('lessons')
@@ -33,6 +33,10 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        updated_course = serializer.save()
+        email_course_updated.delay(updated_course.id)
 
 
 class SubscriptionToggleView(APIView):
