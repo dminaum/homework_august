@@ -15,6 +15,7 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -186,13 +187,16 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
+
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 STRIPE_CURRENCY = os.getenv('STRIPE_CURRENCY', 'rub')
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 REDIS_CACHE_URL = os.getenv("REDIS_CACHE_URL", "redis://localhost:6379/1")
 
-CELERY_BROKER_URL = REDIS_URL
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 
 # URL-адрес брокера результатов, также Redis
 CELERY_RESULT_BACKEND = REDIS_URL
@@ -207,3 +211,12 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+CELERY_BEAT_SCHEDULE = {
+    'run-my-task-every-minute': {
+        'task': 'my_django_app.tasks.my_scheduled_task',
+        'schedule': crontab(minute='*/1'),
+        'args': (1, 2),
+        'kwargs': {'foo': 'bar'},
+    },
+}
