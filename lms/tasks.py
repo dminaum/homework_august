@@ -18,15 +18,14 @@ def email_course_updated(course_id: int):
             if course.last_notification_sent and course.last_notification_sent > now() - FOUR_HOURS:
                 return
 
-            subs = Subscription.objects.filter(course=course).select_related("user")
-            recipient_list = [s.user.email for s in subs if s.user and s.user.email]
+            recipient_list = Subscription.objects.filter(course=course).values_list('user__email', flat=True)
 
             if recipient_list:
                 send_mail(
                     subject=f'Курс "{course.name}" обновлён',
                     message=f'В курсе "{course.name}" появились обновления.',
                     from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None) or "noreply@example.com",
-                    recipient_list=recipient_list,  # можно пачкой
+                    recipient_list=recipient_list,
                     fail_silently=False,
                 )
 
