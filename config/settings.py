@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
 # Application definition
 
 INSTALLED_APPS = [
@@ -119,7 +121,7 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        "LOCATION": f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
     }
 }
 
@@ -187,14 +189,12 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
 
-REDIS_HOST = os.getenv('REDIS_HOST')
-REDIS_PORT = os.getenv('REDIS_PORT')
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 STRIPE_CURRENCY = os.getenv('STRIPE_CURRENCY', 'rub')
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-REDIS_CACHE_URL = os.getenv("REDIS_CACHE_URL", "redis://localhost:6379/1")
+REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+REDIS_CACHE_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 
@@ -214,9 +214,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
     'run-my-task-every-minute': {
-        'task': 'my_django_app.tasks.my_scheduled_task',
-        'schedule': crontab(minute='*/1'),
-        'args': (1, 2),
-        'kwargs': {'foo': 'bar'},
+        'task': 'homework_august.users.deactivate_inactive_users.',
+        'schedule': crontab(day='*/1'),
     },
 }
